@@ -55,19 +55,6 @@
   background-color: #535bf2;
 }
 
-.course-filter {
-  padding: 20px;
-}
-
-.course-filter h3 {
-  margin-bottom: 10px;
-}
-
-.course-checkbox {
-  display: block;
-  margin: 5px 0;
-}
-
 #no-due-assignments {
   margin-top: 20px;
   padding: 20px;

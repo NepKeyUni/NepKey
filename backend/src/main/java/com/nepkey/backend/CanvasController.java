@@ -1,7 +1,6 @@
 package com.nepkey.backend;
 
 import com.nepkey.backend.dto.AssignmentDTO;
-import com.nepkey.backend.dto.CourseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,19 +29,6 @@ public class CanvasController {
             logger.error("Error fetching calendar: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"Failed to fetch calendar events: " + e.getMessage() + "\"}");
-        }
-    }
-
-    @GetMapping("/courses")
-    public ResponseEntity<?> getCourses(@RequestHeader("Authorization") String token) {
-        try {
-            String cleanToken = token.replace("Bearer ", "");
-            List<CourseDTO> courses = canvasService.getCourses(cleanToken);
-            return ResponseEntity.ok(courses);
-        } catch (Exception e) {
-            logger.error("Error fetching courses: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"error\": \"Failed to fetch courses: " + e.getMessage() + "\"}");
         }
     }
 }

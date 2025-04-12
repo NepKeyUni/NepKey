@@ -5,40 +5,14 @@ interface Assignment {
   id: number;
   name: string;
   due_at: string | null;
-  courseId: number;
-  courseName: string;
-}
-
-interface Course {
-  id: number;
-  name: string;
 }
 
 const Calendar: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourses, setSelectedCourses] = useState<number[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date()); // Aktuális hónap
 
-  // Kurzusok és feladatok lekérése
+  // Feladatok lekérése
   useEffect(() => {
-    // Kurzusok
-    fetch('http://localhost:8080/canvas/courses', {
-      headers: {
-        Authorization: 'Bearer OKKUnqKfWy2hDJn8QbwEWqG37T8fAC7BhGQfYJkiH1bg3ZxJWweLsLYCu2CCjdC0',
-      },
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error('Hiba a kurzusok lekérése közben');
-        return response.json();
-      })
-      .then((data: Course[]) => {
-        setCourses(data);
-        setSelectedCourses(data.map((course) => course.id)); // Alapértelmezetten minden kurzus
-      })
-      .catch((error) => console.error('Hiba a kurzusok lekérése közben:', error));
-
-    // Feladatok
     fetch('http://localhost:8080/canvas/calendar', {
       headers: {
         Authorization: 'Bearer OKKUnqKfWy2hDJn8QbwEWqG37T8fAC7BhGQfYJkiH1bg3ZxJWweLsLYCu2CCjdC0',
@@ -51,13 +25,6 @@ const Calendar: React.FC = () => {
       .then((data: Assignment[]) => setAssignments(data))
       .catch((error) => console.error('Hiba a feladatok lekérése közben:', error));
   }, []);
-
-  // Kurzus szűrés
-  const toggleCourse = (courseId: number) => {
-    setSelectedCourses((prev) =>
-      prev.includes(courseId) ? prev.filter((id) => id !== courseId) : [...prev, courseId]
-    );
-  };
 
   // Hónap első és utolsó napja
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -73,7 +40,7 @@ const Calendar: React.FC = () => {
   const renderDay = (day: number) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
     const dayAssignments = assignments.filter((assignment) => {
-      if (!assignment.due_at || !selectedCourses.includes(assignment.courseId)) return false;
+      if (!assignment.due_at) return false;
       const dueDate = new Date(assignment.due_at);
       return (
         dueDate.getFullYear() === date.getFullYear() &&
@@ -87,7 +54,7 @@ const Calendar: React.FC = () => {
         <strong>{day}</strong>
         {dayAssignments.map((assignment) => (
           <div key={assignment.id} className="event">
-            {assignment.courseName}: {assignment.name} (
+            {assignment.name} (
             {new Date(assignment.due_at!).toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' })})
           </div>
         ))}
@@ -103,30 +70,16 @@ const Calendar: React.FC = () => {
   const calendarDays = Array.from({ length: daysInMonth }, (_, i) => renderDay(i + 1));
 
   // Null határidejű feladatok
-  const noDueAssignments = assignments.filter(
-    (assignment) => !assignment.due_at && selectedCourses.includes(assignment.courseId)
-  );
+  const noDueAssignments = assignments.filter((assignment) => !assignment.due_at);
 
   return (
     <div>
       <div className="calendar-header">
         <button onClick={prevMonth}>Előző hónap</button>
-        <h2>{currentDate.toLocaleString('hu-HU', { year: 'numeric', month: 'long' })}</h2>
+        <h2>
+          {currentDate.toLocaleString('hu-HU', { year: 'numeric', month: 'long' })}
+        </h2>
         <button onClick={nextMonth}>Következő hónap</button>
-      </div>
-      <div className="course-filter">
-        <h3>Kurzusok kiválasztása</h3>
-        {courses.length === 0 && <p>Nincsenek elérhető kurzusok.</p>}
-        {courses.map((course) => (
-          <label key={course.id} className="course-checkbox">
-            <input
-              type="checkbox"
-              checked={selectedCourses.includes(course.id)}
-              onChange={() => toggleCourse(course.id)}
-            />
-            {course.name}
-          </label>
-        ))}
       </div>
       <div id="calendar">
         <div className="day-header">Hétfő</div>
@@ -144,7 +97,7 @@ const Calendar: React.FC = () => {
           <h2>Nincs határidő</h2>
           {noDueAssignments.map((assignment) => (
             <div key={assignment.id} className="event">
-              {assignment.courseName}: {assignment.name}
+              {assignment.name}
             </div>
           ))}
         </div>
