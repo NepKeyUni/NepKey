@@ -77,12 +77,13 @@ public class CanvasService {
                     List<Map<String, Object>> assignments = (List<Map<String, Object>>) response.getBody();
                     if (assignments != null) {
                         for (Map<String, Object> assignment : assignments) {
-                            logger.debug("Nyers feladat adat: {}", assignment); // Nyers válasz naplózása
+                            logger.debug("Nyers feladat adat: {}", assignment);
                             AssignmentDTO assignmentDTO = new AssignmentDTO();
                             assignmentDTO.setId(Long.valueOf(String.valueOf(assignment.get("id"))));
                             assignmentDTO.setName((String) assignment.get("name"));
-                            String dueAt = (String) assignment.get("due_at"); // Pontosan due_at kulcs
+                            String dueAt = (String) assignment.get("due_at");
                             assignmentDTO.setDueAt(dueAt);
+                            assignmentDTO.setCourseName(courseName); // Kurzusnév hozzáadása
                             if (dueAt == null) {
                                 logger.warn("Null due_at a feladatnál: {} (Kurzus: {})", assignment.get("name"), courseName);
                             } else {
